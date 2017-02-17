@@ -49,6 +49,16 @@ function createHexTable(asm, hex, xeh) {
     return t;
 }
 
+function createHexEmbed(asm, hex, xeh) {
+  const embed = new Discord.RichEmbed();
+  embed.setColor("#33ccff");
+  embed.addField("ASM", asm.toUpperCase(), true);
+  embed.addField("Hex", hex.toUpperCase(), true);
+  embed.addField("Hex (Big Endian)", xeh.toUpperCase(), true);
+
+  return embed;
+}
+
 function createInstrTable(hex, instr) {
     let t = new Table;
     let data = [
@@ -66,12 +76,13 @@ function createInstrTable(hex, instr) {
     return t;
 }
 
-function outputWebhook(bot, data) {
+function createInstrEmbed(hex, instr) {
+  const embed = new Discord.RichEmbed();
+  embed.setColor("#33ccff");
+  embed.addField("Hex", hex.toUpperCase(), true);
+  embed.addField("Instruction", instr.toUpperCase(), true);
 
-}
-
-function outputChannel(bot, data) {
-
+  return embed;
 }
 
 function disasm(arch, mode, data) {
@@ -103,15 +114,15 @@ var commands = {
             let code = msg.content.split(" ").slice(1).join(" ");
             let bytes = asm(ks.ARCH_ARM, ks.MODE_ARM, code);
 
-            const tableData = createHexTable(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
+            msg.channel.sendEmbed(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM, cs.MODE_ARM, hexToBytes(hex));
 
-            const tableData = createInstrTable(hex, instr);
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createInstrEmbed(hex, instr);
+            msg.channel.sendEmbed(embed);
         }
     },
     "thumb": {
@@ -119,15 +130,15 @@ var commands = {
             let code = msg.content.split(" ").slice(1).join(" ");
             let bytes = asm(ks.ARCH_ARM, ks.MODE_THUMB, code);
 
-            const tableData = createHexTable(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
+            msg.channel.sendEmbed(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM, cs.MODE_THUMB, hexToBytes(hex));
 
-            const tableData = createInstrTable(hex, instr);
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createInstrEmbed(hex, instr);
+            msg.channel.sendEmbed(embed);
         }
     },
     "arm64": {
@@ -135,15 +146,15 @@ var commands = {
             let code = msg.content.split(" ").slice(1).join(" ");
             let bytes = asm(ks.ARCH_ARM64, ks.MODE_LITTLE_ENDIAN, code);
 
-            const tableData = createHexTable(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
+            msg.channel.sendEmbed(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM64, cs.MODE_LITTLE_ENDIAN, hexToBytes(hex));
 
-            const tableData = createInstrTable(hex, instr);
-            msg.reply("```\n"+tableData.toString()+"```\n")
+            const embed = createInstrEmbed(hex, instr);
+            msg.channel.sendEmbed(embed);
         }
     }
 }
