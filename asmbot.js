@@ -12,8 +12,9 @@ const ks = require('./keystone.js');
 const Table = require('easy-table');
 const Discord = require('discord.js');
 
+const token = require('./token.json').token;
+
 const bot = new Discord.Client();
-const token = "MTkyNjkxNDEzNzQ4NTQ3NTg0.Cuf4Tg.nYoOq0kgANnWuAhMAHfwoVtUfnY";
 
 function hexToBytes(hex) {
     for (var bytes = [], c = 0; c < hex.length; c += 2)
@@ -115,14 +116,14 @@ var commands = {
             let bytes = asm(ks.ARCH_ARM, ks.MODE_ARM, code);
 
             const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM, cs.MODE_ARM, hexToBytes(hex));
 
             const embed = createInstrEmbed(hex, instr);
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         }
     },
     "thumb": {
@@ -131,14 +132,14 @@ var commands = {
             let bytes = asm(ks.ARCH_ARM, ks.MODE_THUMB, code);
 
             const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM, cs.MODE_THUMB, hexToBytes(hex));
 
             const embed = createInstrEmbed(hex, instr);
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         }
     },
     "arm64": {
@@ -147,14 +148,14 @@ var commands = {
             let bytes = asm(ks.ARCH_ARM64, ks.MODE_LITTLE_ENDIAN, code);
 
             const embed = createHexEmbed(code, bytesToHex(bytes), bytesToHex(bytes.reverse()));
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         },
         disassemble: (bot, msg) => {
             let hex = msg.content.split(" ").slice(1).join(" ");
             let instr = disasm(cs.ARCH_ARM64, cs.MODE_LITTLE_ENDIAN, hexToBytes(hex));
 
             const embed = createInstrEmbed(hex, instr);
-            msg.channel.sendEmbed(embed);
+            msg.channel.send(embed);
         }
     }
 }

@@ -2,7 +2,7 @@
   "name": "asmbot",
   "version": "1.0.0",
   "description": "A discord bot that can assemble and disassemble from inputs",
-  "main": "main.js",
+  "main": "asmbot.js",
   "dependencies": {
     "discord.js": "^11.0.0",
     "easy-table": "^1.0.0",
