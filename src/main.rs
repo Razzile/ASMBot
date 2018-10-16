@@ -1,40 +1,75 @@
-extern crate capstone;
-extern crate hex;
+//! Requires the 'framework' feature flag be enabled in your project's
+//! `Cargo.toml`.
+//!
+//! This can be enabled by specifying the feature in the dependency section:
+//!
+//! ```toml
+//! [dependencies.serenity]
+//! git = "https://github.com/serenity-rs/serenity.git"
+//! features = ["framework", "standard_framework"]
+//! ```
 
-use std::io;
-use capstone::prelude::*;
+#[macro_use] extern crate log;
+#[macro_use] extern crate serenity;
 
-fn convert(hexstr: &String) -> CsResult<()> {
-    let mut cs = Capstone::new()
-        .arm()
-        .mode(arch::arm::ArchMode::Arm)
-        .build()?;
-        
-    let bytes = hex::decode(hexstr).unwrap();
-    let instrs = cs.disasm_all(&bytes, 0x0)?;
+extern crate env_logger;
+extern crate kankyo;
 
-    for i in instrs.iter() {
-        let mnemonic = i.mnemonic().unwrap();
-        let op_str = i.op_str().unwrap();
+mod commands;
 
-        println!("{} {}", mnemonic, op_str);
+use serenity::framework::StandardFramework;
+use serenity::model::event::ResumedEvent;
+use serenity::model::gateway::Ready;
+use serenity::prelude::*;
+use serenity::http;
+use std::collections::HashSet;
+use std::env;
+
+struct Handler;
+
+impl EventHandler for Handler {
+    fn ready(&self, _: Context, ready: Ready) {
+        info!("Connected as {}", ready.user.name);
     }
 
-    Ok(())
+    fn resume(&self, _: Context, _: ResumedEvent) {
+        info!("Resumed");
+    }
 }
 
 fn main() {
-    let mut hexstr = String::new();
+    // This will load the environment variables located at `./.env`, relative to
+    // the CWD. See `./.env.example` for an example on how to structure this.
+    kankyo::load().expect("Failed to load .env file");
 
-    println!("Enter instruction: ");
-    if let Ok(_) = io::stdin().read_line(&mut hexstr) { 
+    // Initialize the logger to use environment variables.
+    //
+    // In this case, a good default is setting the environment variable
+    // `RUST_LOG` to debug`.
+    env_logger::init().expect("Failed to initialize env_logger");
 
-		let hexstr = hexstr.replace("\n", "");
+    let token = env::var("DISCORD_TOKEN")
+        .expect("Expected a token in the environment");
 
-		if hexstr.is_empty() {
-			panic!("No instr provided");
-		}
+    let mut client = Client::new(&token, Handler).expect("Err creating client");
 
-		convert(&hexstr).expect("could not decode instruction");
-	}
+    let owners = match http::get_current_application_info() {
+        Ok(info) => {
+            let mut set = HashSet::new();
+            set.insert(info.owner.id);
+
+            set
+        },
+        Err(why) => panic!("Couldn't get application info: {:?}", why),
+    };
+
+    client.with_framework(StandardFramework::new()
+        .configure(|c| c
+            .owners(owners)
+            .prefix(">"))
+        .command("convert", |c| c.cmd(commands::convert::ConvertCommand)));
+
+    if let Err(why) = client.start() {
+        error!("Client error: {:?}", why);
+    }
 }
