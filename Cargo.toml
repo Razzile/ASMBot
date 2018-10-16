@@ -6,3 +6,9 @@ authors = ["Razzile"]
 [dependencies]
 capstone = ">=0.5.0"
 hex = ">=0.3.1"
+env_logger = "~0.4"
+kankyo = "~0.1"
+log = "~0.3"
+
+[dependencies.serenity]
+features = ["cache", "framework", "standard_framework"]
